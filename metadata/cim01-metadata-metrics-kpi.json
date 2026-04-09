@@ -1,0 +1,522 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/cim/kpi-metadata.schema.json",
+  "title": "CIM KPI Metadata Block",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "kpi", "boundary", "meter_points", "provenance"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "Schema version for forward/backward compatible validation.",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "examples": ["1.0.0"]
+    },
+
+    "kpi": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "standard_refs", "reporting_period"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Canonical KPI identifier used in your CIM namespace (stable across implementations).",
+          "pattern": "^[a-z0-9][a-z0-9._-]{2,63}$",
+          "examples": ["dc.kpi.pue", "dc.kpi.wue", "dc.kpi.erf", "dc.kpi.ref", "dc.kpi.cue"]
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable KPI name."
+        },
+        "description": {
+          "type": "string",
+          "description": "Short definition, boundary assumptions, and any local notes."
+        },
+
+        "standard_refs": {
+          "type": "array",
+          "minItems": 1,
+          "description": "One or more normative references used to define method and boundary semantics.",
+          "items": { "$ref": "#/$defs/standardRef" }
+        },
+
+        "category": {
+          "type": "object",
+          "description": "Measurement category / class (if the KPI standard defines categories). Keep generic to avoid hardcoding category enumerations.",
+          "additionalProperties": false,
+          "required": ["scheme", "value"],
+          "properties": {
+            "scheme": {
+              "type": "string",
+              "description": "Category scheme identifier (e.g., EN50600-4-2 PUE categories).",
+              "examples": ["EN50600-4-2:PUE-category", "EN50600-4-9:WUE-category"]
+            },
+            "value": {
+              "type": "string",
+              "description": "Category value as defined by the referenced scheme (store as string for maximum compatibility).",
+              "examples": ["0", "1", "2", "3", "A", "B"]
+            },
+            "justification": {
+              "type": "string",
+              "description": "Why this category applies (metering topology, granularity, etc.)."
+            }
+          }
+        },
+
+        "reporting_period": {
+          "type": "object",
+          "description": "The period used for the KPI export (annual by default for EU submissions).",
+          "additionalProperties": false,
+          "required": ["type", "timezone"],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["annual", "monthly", "quarterly", "custom"],
+              "description": "Export aggregation period."
+            },
+            "timezone": {
+              "type": "string",
+              "description": "IANA timezone used for aggregation boundaries.",
+              "examples": ["Europe/Amsterdam", "UTC"]
+            },
+            "custom": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["start", "end"],
+              "properties": {
+                "start": { "type": "string", "format": "date-time" },
+                "end": { "type": "string", "format": "date-time" }
+              }
+            }
+          },
+          "allOf": [
+            {
+              "if": { "properties": { "type": { "const": "custom" } }, "required": ["type"] },
+              "then": { "required": ["custom"] }
+            }
+          ]
+        }
+      }
+    },
+
+    "boundary": {
+      "type": "object",
+      "description": "Boundary definition for the KPI (what is included/excluded and where measurement points sit).",
+      "additionalProperties": false,
+      "required": ["site", "system", "inclusions", "exclusions"],
+      "properties": {
+        "site": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["site_id", "site_name"],
+          "properties": {
+            "site_id": {
+              "type": "string",
+              "description": "Stable identifier for site/facility.",
+              "pattern": "^[A-Za-z0-9._-]{1,64}$"
+            },
+            "site_name": { "type": "string" },
+            "country_code": {
+              "type": "string",
+              "description": "ISO 3166-1 alpha-2.",
+              "pattern": "^[A-Z]{2}$"
+            }
+          }
+        },
+
+        "system": {
+          "type": "object",
+          "description": "What the KPI boundary is intended to represent (e.g., whole data centre, one hall, one building).",
+          "additionalProperties": false,
+          "required": ["scope", "scope_id"],
+          "properties": {
+            "scope": {
+              "type": "string",
+              "enum": ["data_centre", "building", "suite", "room", "zone", "pod", "other"]
+            },
+            "scope_id": {
+              "type": "string",
+              "description": "Identifier for the scoped subsystem (hall/suite/zone)."
+            },
+            "diagram_ref": {
+              "type": "string",
+              "description": "Optional reference to a topology diagram or model (URL/path/id)."
+            }
+          }
+        },
+
+        "inclusions": {
+          "type": "array",
+          "description": "Included subsystems/processes (explicit list improves auditability).",
+          "minItems": 1,
+          "items": { "type": "string" },
+          "examples": [["IT load", "Power distribution losses", "Cooling plant", "Lighting", "Security"]]
+        },
+
+        "exclusions": {
+          "type": "array",
+          "description": "Explicit exclusions (e.g., office building loads, non-DC tenants, etc.).",
+          "items": { "type": "string" }
+        },
+
+        "boundary_notes": {
+          "type": "string",
+          "description": "Additional explanation of boundary assumptions, especially for mixed-use sites or colocations."
+        }
+      }
+    },
+
+    "meter_points": {
+      "type": "array",
+      "description": "Authoritative meter points used to compute the KPI (and/or its numerator/denominator).",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/meterPoint" }
+    },
+
+    "computation": {
+      "type": "object",
+      "description": "Optional computation rules for deterministic KPI calculation and test reproducibility.",
+      "additionalProperties": false,
+      "properties": {
+        "formula_id": {
+          "type": "string",
+          "description": "Stable identifier for the formula variant you implement (e.g., EU: PUE = EDC/EIT).",
+          "examples": ["EU2024:PUE=EDC/EIT", "EU2024:WUE=WIN/EIT"]
+        },
+        "aggregation": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "base_interval_seconds": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Nominal sampling interval for base timeseries."
+            },
+            "method": {
+              "type": "string",
+              "enum": ["sum", "time_weighted_mean", "mean", "max", "min"],
+              "description": "How raw samples are aggregated into reporting periods."
+            },
+            "gap_handling": {
+              "type": "string",
+              "enum": ["fail", "interpolate_linear", "carry_forward", "omit"],
+              "description": "Deterministic missing-data handling policy."
+            },
+            "outlier_policy": {
+              "type": "string",
+              "enum": ["none", "winsorize", "clip", "flag_only"],
+              "description": "Deterministic outlier rule (or just flag)."
+            }
+          }
+        }
+      }
+    },
+
+    "export_mappings": {
+      "type": "object",
+      "description": "Optional explicit mapping from CIM base measures to EU reporting variable names; enables deterministic export generation.",
+      "additionalProperties": false,
+      "properties": {
+        "regime": {
+          "type": "string",
+          "description": "Target export regime/version.",
+          "examples": ["EU-DCDB-2024-1364:first-phase"]
+        },
+        "variables": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/exportVariableMap" }
+        }
+      }
+    },
+
+    "provenance": {
+      "type": "object",
+      "description": "Traceability and evidence of how the KPI dataset was produced (auditability, reproducibility).",
+      "additionalProperties": false,
+      "required": ["data_sources", "pipeline", "quality"],
+      "properties": {
+        "data_sources": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/dataSource" }
+        },
+
+        "pipeline": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["producer", "producer_version", "generated_at"],
+          "properties": {
+            "producer": {
+              "type": "string",
+              "description": "Name of the CIM/EMI software component that generated the KPI dataset."
+            },
+            "producer_version": {
+              "type": "string",
+              "description": "Semantic version of the producer."
+            },
+            "generated_at": { "type": "string", "format": "date-time" },
+            "config_hash": {
+              "type": "string",
+              "description": "Hash of configuration/mapping files to guarantee reproducibility.",
+              "pattern": "^[A-Fa-f0-9]{32,128}$"
+            },
+            "schema_id": {
+              "type": "string",
+              "description": "Identifier of this schema or schema bundle used during validation."
+            }
+          }
+        },
+
+        "quality": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["coverage", "time_sync"],
+          "properties": {
+            "coverage": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["expected_samples", "received_samples"],
+              "properties": {
+                "expected_samples": { "type": "integer", "minimum": 0 },
+                "received_samples": { "type": "integer", "minimum": 0 },
+                "coverage_ratio": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "description": "Optional computed ratio; keep if you want deterministic checks."
+                }
+              }
+            },
+            "time_sync": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["source", "max_clock_skew_ms"],
+              "properties": {
+                "source": { "type": "string", "enum": ["NTP", "PTP", "GPS", "unknown"] },
+                "max_clock_skew_ms": { "type": "integer", "minimum": 0 }
+              }
+            },
+            "review": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "reviewed_by": { "type": "string" },
+                "reviewed_at": { "type": "string", "format": "date-time" },
+                "notes": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+
+  "$defs": {
+    "standardRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["standard_id"],
+      "properties": {
+        "standard_id": {
+          "type": "string",
+          "description": "Identifier for the standard or regulation used for method semantics.",
+          "examples": ["EN 50600-4-2", "EN 50600-4-9", "ISO/IEC 30134-2", "EU 2024/1364 Annex II"]
+        },
+        "edition": {
+          "type": "string",
+          "description": "Edition/year if you track it.",
+          "examples": ["2017", "2023", "2024"]
+        },
+        "clause": {
+          "type": "string",
+          "description": "Optional clause/annex pointer for precise traceability.",
+          "examples": ["Annex II", "Annex III", "Clause 5.3"]
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Optional reference link."
+        }
+      }
+    },
+
+    "meterPoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "quantity", "unit", "location", "direction", "authoritative", "source_ref"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Stable meter point identifier (within the site boundary).",
+          "pattern": "^[A-Za-z0-9._-]{1,64}$",
+          "examples": ["MP-UTILITY-IN", "MP-UPS-OUT", "MP-IT-PDU-SUM", "MP-WATER-IN"]
+        },
+
+        "quantity": {
+          "type": "string",
+          "description": "What is being measured at this point.",
+          "enum": [
+            "energy_electricity",
+            "energy_thermal",
+            "power_electricity",
+            "water_volume",
+            "water_flow",
+            "emissions_co2e",
+            "temperature",
+            "humidity",
+            "other"
+          ]
+        },
+
+        "unit": {
+          "type": "string",
+          "description": "Unit code. Use UCUM where possible for unambiguous conversions.",
+          "examples": ["kWh", "MWh", "kW", "m3", "L", "kg", "kgCO2e", "degC"]
+        },
+
+        "direction": {
+          "type": "string",
+          "enum": ["import", "export", "internal"],
+          "description": "Direction relative to the KPI boundary."
+        },
+
+        "authoritative": {
+          "type": "boolean",
+          "description": "If true, this is the authoritative meter for the export. If false, it is auxiliary/diagnostic."
+        },
+
+        "location": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["logical", "physical"],
+          "properties": {
+            "logical": {
+              "type": "string",
+              "description": "Logical placement (e.g., 'utility feed', 'UPS output', 'IT bus', 'cooling plant')."
+            },
+            "physical": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "building": { "type": "string" },
+                "room": { "type": "string" },
+                "rack": { "type": "string" },
+                "panel": { "type": "string" },
+                "lat": { "type": "number", "minimum": -90, "maximum": 90 },
+                "lon": { "type": "number", "minimum": -180, "maximum": 180 }
+              }
+            }
+          }
+        },
+
+        "source_ref": {
+          "type": "string",
+          "description": "Reference to a data_sources[*].id entry (provenance linkage)."
+        },
+
+        "accuracy": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "class": {
+              "type": "string",
+              "description": "Accuracy class if known (e.g., meter class or %)."
+            },
+            "uncertainty_pct": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "calibration_date": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        },
+
+        "sampling": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "interval_seconds": { "type": "integer", "minimum": 1 },
+            "aggregation": {
+              "type": "string",
+              "enum": ["raw", "sum", "mean", "time_weighted_mean", "max", "min"]
+            }
+          }
+        },
+
+        "tags": {
+          "type": "object",
+          "description": "Freeform tags for your internal use (do not affect validation).",
+          "additionalProperties": { "type": "string" }
+        }
+      }
+    },
+
+    "dataSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "endpoint", "auth", "format"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]{1,64}$",
+          "examples": ["SRC-EMS", "SRC-REDISH", "SRC-PROM", "SRC-MODBUS"]
+        },
+        "type": {
+          "type": "string",
+          "enum": ["ems", "bms", "meter_gateway", "redfish", "snmp", "opentelemetry", "prometheus", "file_import", "other"]
+        },
+        "endpoint": {
+          "type": "string",
+          "description": "Logical endpoint (URL/host/path) or import source identifier.",
+          "examples": ["https://ems.example/api", "snmp://10.0.0.10", "file://imports/2025.csv"]
+        },
+        "auth": {
+          "type": "string",
+          "enum": ["none", "basic", "token", "mtls", "oauth2", "other"],
+          "description": "Authentication mode used to fetch data (do not store secrets here)."
+        },
+        "format": {
+          "type": "string",
+          "enum": ["json", "csv", "openmetrics", "otlp", "modbus", "bacnet", "other"]
+        },
+        "notes": { "type": "string" }
+      }
+    },
+
+    "exportVariableMap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["export_name", "cim_metric", "unit"],
+      "properties": {
+        "export_name": {
+          "type": "string",
+          "description": "Export variable name used by the reporting regime.",
+          "examples": ["EDC", "EIT", "WIN", "EREUSE", "ERES-TOT", "PUE", "WUE", "ERF", "REF"]
+        },
+        "cim_metric": {
+          "type": "string",
+          "description": "Your canonical CIM metric name.",
+          "pattern": "^[a-z0-9][a-z0-9._-]{2,127}$",
+          "examples": ["dc.energy.total_kwh", "dc.energy.it_kwh", "dc.water.input_l", "dc.kpi.pue"]
+        },
+        "unit": {
+          "type": "string",
+          "description": "Unit used in the export field (your exporter should perform deterministic conversions).",
+          "examples": ["kWh", "MWh", "L", "m3", "ratio"]
+        },
+        "transform": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "type": { "type": "string", "enum": ["identity", "scale", "convert_unit", "custom"] },
+            "factor": { "type": "number" },
+            "custom_id": { "type": "string", "description": "Identifier for a custom transform in your exporter." }
+          }
+        }
+      }
+    }
+  }
+}
