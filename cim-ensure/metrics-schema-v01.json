@@ -1,0 +1,590 @@
+{
+  "@context": {
+    "@vocab": "https://ensure-project.eu/pear#",
+
+    "id": "@id",
+    "type": "@type",
+
+    "Metric": "Metric",
+    "DerivedMetric": "DerivedMetric",
+    "Producer": "Producer",
+    "InstanceType": "InstanceType",
+    "Benchmark": "Benchmark",
+    "EntryTag": "EntryTag",
+    "AggregationMethod": "AggregationMethod",
+    "Unit": "Unit"
+  },
+
+  "@graph": [
+
+    {
+      "@id": "Record",
+      "@type": "Class",
+      "requiredKeyFields": [
+        "month",
+        "vo",
+        "site",
+        "accounting_instance",
+        "instance_type",
+        "producer"
+      ]
+    },
+
+    {
+      "@id": "CommonTags",
+      "@type": "Vocabulary",
+      "fields": [
+        "schema_version",
+        "country",
+        "ngi",
+        "ri"
+      ]
+    },
+
+    {
+      "@id": "CommunityTags",
+      "@type": "Vocabulary",
+      "fields": [
+        "federation",
+        "tier",
+        "cloud_type"
+      ]
+    },
+
+    {
+      "@id": "InstanceTypes",
+      "@type": "Vocabulary",
+      "members": [
+        {
+          "@id": "ce",
+          "@type": "InstanceType",
+          "label": "Grid or local batch compute endpoint"
+        },
+        {
+          "@id": "cloud",
+          "@type": "InstanceType",
+          "label": "Cloud compute service"
+        },
+        {
+          "@id": "accelerator",
+          "@type": "InstanceType",
+          "label": "GPU or accelerator service"
+        },
+        {
+          "@id": "se",
+          "@type": "InstanceType",
+          "label": "Storage resource"
+        },
+        {
+          "@id": "facility",
+          "@type": "InstanceType",
+          "label": "Data centre or facility"
+        }
+      ]
+    },
+
+    {
+      "@id": "ProducerVocabulary",
+      "@type": "Vocabulary",
+      "members": [
+        "auditor",
+        "storage-accounting",
+        "cloud-accounting",
+        "site-reported",
+        "site-validated",
+        "ngi-validated",
+        "atlas-validated",
+        "cms-validated"
+      ]
+    },
+
+    {
+      "@id": "BenchmarkVocabulary",
+      "@type": "Vocabulary",
+      "members": [
+        {
+          "@id": "HEPSCORE23",
+          "@type": "Benchmark"
+        },
+        {
+          "@id": "HS06",
+          "@type": "Benchmark"
+        },
+        {
+          "@id": "SI2K",
+          "@type": "Benchmark"
+        }
+      ]
+    },
+
+    {
+      "@id": "AggregationVocabulary",
+      "@type": "Vocabulary",
+      "members": [
+        "sum",
+        "weighted_mean",
+        "maximum"
+      ]
+    },
+
+    {
+      "@id": "EntryTagVocabulary",
+      "@type": "Vocabulary",
+      "members": [
+        {
+          "@id": "submit",
+          "@type": "EntryTag",
+          "allowedValues": [
+            "grid",
+            "local"
+          ]
+        },
+        {
+          "@id": "cores",
+          "@type": "EntryTag"
+        },
+        {
+          "@id": "method",
+          "@type": "EntryTag",
+          "allowedValues": [
+            "measured",
+            "estimated"
+          ]
+        },
+        {
+          "@id": "carbon_mode",
+          "@type": "EntryTag",
+          "allowedValues": [
+            "location_based",
+            "market_based"
+          ]
+        },
+        {
+          "@id": "type",
+          "@type": "EntryTag",
+          "allowedValues": [
+            "GPU",
+            "FPGA",
+            "other"
+          ]
+        },
+        {
+          "@id": "model",
+          "@type": "EntryTag"
+        }
+      ]
+    },
+
+    {
+      "@id": "job_count",
+      "@type": "Metric",
+      "unit": "count",
+      "dataType": "integer",
+      "aggregation": "sum",
+      "instanceTypes": [
+        "ce"
+      ],
+      "entryTags": [
+        "submit",
+        "cores"
+      ]
+    },
+
+    {
+      "@id": "wall_clock_time",
+      "@type": "Metric",
+      "unit": "core-hours",
+      "dataType": "integer",
+      "aggregation": "sum",
+      "instanceTypes": [
+        "ce",
+        "cloud"
+      ],
+      "entryTags": [
+        "submit",
+        "cores"
+      ]
+    },
+
+    {
+      "@id": "wall_clock_work",
+      "@type": "Metric",
+      "unit": "benchmark-core-hours",
+      "dataType": "integer",
+      "aggregation": "sum",
+      "instanceTypes": [
+        "ce",
+        "cloud"
+      ],
+      "benchmarks": [
+        "HEPSCORE23",
+        "HS06",
+        "SI2K"
+      ]
+    },
+
+    {
+      "@id": "cpu_time",
+      "@type": "Metric",
+      "unit": "core-hours",
+      "dataType": "integer",
+      "aggregation": "sum",
+      "instanceTypes": [
+        "ce",
+        "cloud"
+      ]
+    },
+
+    {
+      "@id": "cpu_work",
+      "@type": "Metric",
+      "unit": "benchmark-core-hours",
+      "dataType": "integer",
+      "aggregation": "sum",
+      "instanceTypes": [
+        "ce",
+        "cloud"
+      ],
+      "benchmarks": [
+        "HEPSCORE23",
+        "HS06",
+        "SI2K"
+      ]
+    },
+
+    {
+      "@id": "disk_used",
+      "@type": "Metric",
+      "unit": "bytes",
+      "dataType": "integer",
+      "aggregation": "averageOverTime",
+      "instanceTypes": [
+        "se"
+      ]
+    },
+
+    {
+      "@id": "disk_total",
+      "@type": "Metric",
+      "unit": "bytes",
+      "dataType": "integer",
+      "aggregation": "averageOverTime",
+      "instanceTypes": [
+        "se"
+      ]
+    },
+
+    {
+      "@id": "tape_used",
+      "@type": "Metric",
+      "unit": "bytes",
+      "dataType": "integer",
+      "aggregation": "averageOverTime",
+      "instanceTypes": [
+        "se"
+      ]
+    },
+
+    {
+      "@id": "tape_total",
+      "@type": "Metric",
+      "unit": "bytes",
+      "dataType": "integer",
+      "aggregation": "averageOverTime",
+      "instanceTypes": [
+        "se"
+      ]
+    },
+
+    {
+      "@id": "vm_count",
+      "@type": "Metric",
+      "unit": "count",
+      "instanceTypes": [
+        "cloud"
+      ]
+    },
+
+    {
+      "@id": "cpu_count",
+      "@type": "Metric",
+      "unit": "count",
+      "instanceTypes": [
+        "cloud"
+      ]
+    },
+
+    {
+      "@id": "memory_allocated_time",
+      "@type": "Metric",
+      "unit": "GB-hours",
+      "instanceTypes": [
+        "cloud"
+      ]
+    },
+
+    {
+      "@id": "disk_allocated_time",
+      "@type": "Metric",
+      "unit": "GB-hours",
+      "instanceTypes": [
+        "cloud"
+      ]
+    },
+
+    {
+      "@id": "network_in",
+      "@type": "Metric",
+      "unit": "bytes",
+      "instanceTypes": [
+        "cloud"
+      ]
+    },
+
+    {
+      "@id": "network_out",
+      "@type": "Metric",
+      "unit": "bytes",
+      "instanceTypes": [
+        "cloud"
+      ]
+    },
+
+    {
+      "@id": "accelerator_count",
+      "@type": "Metric",
+      "unit": "count",
+      "instanceTypes": [
+        "accelerator"
+      ],
+      "entryTags": [
+        "type",
+        "model"
+      ]
+    },
+
+    {
+      "@id": "accelerator_cores",
+      "@type": "Metric",
+      "unit": "count",
+      "instanceTypes": [
+        "accelerator"
+      ]
+    },
+
+    {
+      "@id": "accelerator_available_time",
+      "@type": "Metric",
+      "unit": "accelerator-hours",
+      "instanceTypes": [
+        "accelerator"
+      ]
+    },
+
+    {
+      "@id": "accelerator_active_time",
+      "@type": "Metric",
+      "unit": "accelerator-hours",
+      "instanceTypes": [
+        "accelerator"
+      ]
+    },
+
+    {
+      "@id": "accelerator_work",
+      "@type": "Metric",
+      "unit": "benchmark-accelerator-hours",
+      "instanceTypes": [
+        "accelerator"
+      ]
+    },
+
+    {
+      "@id": "energy_consumed",
+      "@type": "Metric",
+      "domain": "Sustainability",
+      "unit": "kWh",
+      "instanceTypes": [
+        "ce",
+        "cloud"
+      ],
+      "entryTags": [
+        "method"
+      ]
+    },
+
+    {
+      "@id": "operational_carbon",
+      "@type": "Metric",
+      "domain": "Sustainability",
+      "unit": "gCO2e",
+      "instanceTypes": [
+        "ce",
+        "cloud"
+      ],
+      "entryTags": [
+        "method",
+        "carbon_mode"
+      ]
+    },
+
+    {
+      "@id": "embodied_carbon",
+      "@type": "Metric",
+      "domain": "Sustainability",
+      "unit": "gCO2e",
+      "instanceTypes": [
+        "ce",
+        "cloud"
+      ],
+      "entryTags": [
+        "method"
+      ]
+    },
+
+    {
+      "@id": "facility_energy",
+      "@type": "Metric",
+      "domain": "FacilitySustainability",
+      "unit": "kWh",
+      "instanceTypes": [
+        "facility"
+      ]
+    },
+
+    {
+      "@id": "it_energy",
+      "@type": "Metric",
+      "domain": "FacilitySustainability",
+      "unit": "kWh",
+      "instanceTypes": [
+        "facility"
+      ]
+    },
+
+    {
+      "@id": "renewable_energy",
+      "@type": "Metric",
+      "domain": "FacilitySustainability",
+      "unit": "kWh",
+      "instanceTypes": [
+        "facility"
+      ]
+    },
+
+    {
+      "@id": "reused_energy",
+      "@type": "Metric",
+      "domain": "FacilitySustainability",
+      "unit": "kWh",
+      "instanceTypes": [
+        "facility"
+      ]
+    },
+
+    {
+      "@id": "cooling_energy",
+      "@type": "Metric",
+      "domain": "FacilitySustainability",
+      "unit": "kWh",
+      "instanceTypes": [
+        "facility"
+      ]
+    },
+
+    {
+      "@id": "cooling_heat_removed",
+      "@type": "Metric",
+      "domain": "FacilitySustainability",
+      "unit": "kWh",
+      "instanceTypes": [
+        "facility"
+      ]
+    },
+
+    {
+      "@id": "water_input",
+      "@type": "Metric",
+      "unit": "L",
+      "instanceTypes": [
+        "facility"
+      ]
+    },
+
+    {
+      "@id": "facility_carbon",
+      "@type": "Metric",
+      "unit": "gCO2e",
+      "instanceTypes": [
+        "facility"
+      ],
+      "entryTags": [
+        "method",
+        "carbon_mode"
+      ]
+    },
+
+    {
+      "@id": "cpu_efficiency",
+      "@type": "DerivedMetric",
+      "formula": "cpu_time / wall_clock_time",
+      "unit": "ratio"
+    },
+
+    {
+      "@id": "disk_free",
+      "@type": "DerivedMetric",
+      "formula": "disk_total - disk_used",
+      "unit": "bytes"
+    },
+
+    {
+      "@id": "tape_free",
+      "@type": "DerivedMetric",
+      "formula": "tape_total - tape_used",
+      "unit": "bytes"
+    },
+
+    {
+      "@id": "pue",
+      "@type": "DerivedMetric",
+      "formula": "facility_energy / it_energy",
+      "unit": "ratio"
+    },
+
+    {
+      "@id": "renewable_energy_factor",
+      "@type": "DerivedMetric",
+      "formula": "renewable_energy / facility_energy",
+      "unit": "ratio"
+    },
+
+    {
+      "@id": "energy_reuse_factor",
+      "@type": "DerivedMetric",
+      "formula": "reused_energy / facility_energy",
+      "unit": "ratio"
+    },
+
+    {
+      "@id": "cooling_efficiency_ratio",
+      "@type": "DerivedMetric",
+      "formula": "cooling_heat_removed / cooling_energy",
+      "unit": "ratio"
+    },
+
+    {
+      "@id": "wue",
+      "@type": "DerivedMetric",
+      "formula": "water_input / it_energy",
+      "unit": "L/kWh"
+    },
+
+    {
+      "@id": "cue",
+      "@type": "DerivedMetric",
+      "formula": "facility_carbon / it_energy",
+      "unit": "gCO2e/kWh"
+    }
+  ]
+}

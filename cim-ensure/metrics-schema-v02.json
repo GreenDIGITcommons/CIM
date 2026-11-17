@@ -1,0 +1,612 @@
+{
+  "@context": {
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "skos": "http://www.w3.org/2004/02/skos/core#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+
+    "pear": "https://pear.ensure-project.eu/ontology/",
+    "metric": "https://pear.ensure-project.eu/metric/",
+
+    "compute": "https://pear.ensure-project.eu/metric/compute/",
+    "storage": "https://pear.ensure-project.eu/metric/storage/",
+    "cloud": "https://pear.ensure-project.eu/metric/cloud/",
+    "accelerator": "https://pear.ensure-project.eu/metric/accelerator/",
+    "sw": "https://pear.ensure-project.eu/metric/sustainability/workload/",
+    "sf": "https://pear.ensure-project.eu/metric/sustainability/facility/",
+    "kpi": "https://pear.ensure-project.eu/metric/derived/",
+
+    "Metric": "pear:Metric",
+    "DerivedMetric": "pear:DerivedMetric",
+    "MetricGroup": "pear:MetricGroup",
+    "Producer": "pear:Producer",
+    "InstanceType": "pear:InstanceType",
+    "Benchmark": "pear:Benchmark",
+    "EntryTag": "pear:EntryTag",
+
+    "legacyName": "pear:legacyName",
+    "unit": "pear:unit",
+    "aggregation": "pear:aggregation",
+    "instanceTypes": "pear:instanceTypes",
+    "expectedFor": "pear:expectedFor",
+    "benchmarks": "pear:benchmarks",
+    "entryTags": "pear:entryTags",
+    "formula": "pear:formula",
+    "status": "pear:status"
+  },
+
+  "@graph": [
+
+    {
+      "@id": "pear:AccountingRecord",
+      "@type": "rdfs:Class"
+    },
+
+    {
+      "@id": "pear:Metric",
+      "@type": "rdfs:Class"
+    },
+
+    {
+      "@id": "pear:DerivedMetric",
+      "@type": "rdfs:Class",
+      "rdfs:subClassOf": {
+        "@id": "pear:Metric"
+      }
+    },
+
+    {
+      "@id": "pear:MetricGroup",
+      "@type": "rdfs:Class"
+    },
+
+    {
+      "@id": "pear:InstanceType",
+      "@type": "rdfs:Class"
+    },
+
+    {
+      "@id": "pear:Producer",
+      "@type": "rdfs:Class"
+    },
+
+    {
+      "@id": "pear:Benchmark",
+      "@type": "rdfs:Class"
+    },
+
+    {
+      "@id": "pear:EntryTag",
+      "@type": "rdfs:Class"
+    },
+
+
+
+    {
+      "@id": "pear:compute",
+      "@type": "MetricGroup"
+    },
+
+    {
+      "@id": "pear:storage",
+      "@type": "MetricGroup"
+    },
+
+    {
+      "@id": "pear:cloud",
+      "@type": "MetricGroup"
+    },
+
+    {
+      "@id": "pear:accelerator",
+      "@type": "MetricGroup"
+    },
+
+    {
+      "@id": "pear:sustainability-workload",
+      "@type": "MetricGroup"
+    },
+
+    {
+      "@id": "pear:sustainability-facility",
+      "@type": "MetricGroup"
+    },
+
+    {
+      "@id": "pear:derived",
+      "@type": "MetricGroup"
+    },
+
+
+
+    {
+      "@id": "pear:ce",
+      "@type": "InstanceType"
+    },
+
+    {
+      "@id": "pear:cloud-instance",
+      "@type": "InstanceType"
+    },
+
+    {
+      "@id": "pear:accelerator-instance",
+      "@type": "InstanceType"
+    },
+
+    {
+      "@id": "pear:se",
+      "@type": "InstanceType"
+    },
+
+    {
+      "@id": "pear:facility",
+      "@type": "InstanceType"
+    },
+
+
+
+    {
+      "@id": "pear:auditor",
+      "@type": "Producer"
+    },
+
+    {
+      "@id": "pear:storage-accounting",
+      "@type": "Producer"
+    },
+
+    {
+      "@id": "pear:cloud-accounting",
+      "@type": "Producer"
+    },
+
+    {
+      "@id": "pear:site-reported",
+      "@type": "Producer"
+    },
+
+    {
+      "@id": "pear:site-validated",
+      "@type": "Producer"
+    },
+
+    {
+      "@id": "pear:ngi-validated",
+      "@type": "Producer"
+    },
+
+    {
+      "@id": "pear:atlas-validated",
+      "@type": "Producer"
+    },
+
+    {
+      "@id": "pear:cms-validated",
+      "@type": "Producer"
+    },
+
+
+
+    {
+      "@id": "pear:HEPSCORE23",
+      "@type": "Benchmark"
+    },
+
+    {
+      "@id": "pear:HS06",
+      "@type": "Benchmark"
+    },
+
+    {
+      "@id": "pear:SI2K",
+      "@type": "Benchmark"
+    },
+
+
+
+    {
+      "@id": "pear:submit",
+      "@type": "EntryTag",
+      "allowedValues": ["grid","local"]
+    },
+
+    {
+      "@id": "pear:cores",
+      "@type": "EntryTag"
+    },
+
+    {
+      "@id": "pear:method",
+      "@type": "EntryTag",
+      "allowedValues": ["measured","estimated"]
+    },
+
+    {
+      "@id": "pear:carbon_mode",
+      "@type": "EntryTag",
+      "allowedValues": [
+        "location_based",
+        "market_based"
+      ]
+    },
+
+    {
+      "@id": "pear:type",
+      "@type": "EntryTag",
+      "allowedValues": [
+        "GPU",
+        "FPGA",
+        "other"
+      ]
+    },
+
+    {
+      "@id": "pear:model",
+      "@type": "EntryTag"
+    },
+
+
+
+    {
+      "@id": "compute:job_count",
+      "@type": "Metric",
+      "legacyName": "job_count",
+      "unit": "count",
+      "aggregation": "sum",
+      "instanceTypes": ["ce"],
+      "entryTags": ["submit","cores"]
+    },
+
+    {
+      "@id": "compute:wall_clock_time",
+      "@type": "Metric",
+      "legacyName": "wall_clock_time",
+      "unit": "core-hours",
+      "aggregation": "sum",
+      "instanceTypes": ["ce","cloud-instance"],
+      "expectedFor": ["ce","cloud-instance"],
+      "entryTags": ["submit","cores"]
+    },
+
+    {
+      "@id": "compute:wall_clock_work",
+      "@type": "Metric",
+      "legacyName": "wall_clock_work",
+      "unit": "benchmark-core-hours",
+      "aggregation": "sum",
+      "instanceTypes": ["ce","cloud-instance"],
+      "benchmarks": [
+        "HEPSCORE23",
+        "HS06",
+        "SI2K"
+      ],
+      "entryTags": ["submit","cores"]
+    },
+
+    {
+      "@id": "compute:cpu_time",
+      "@type": "Metric",
+      "legacyName": "cpu_time",
+      "unit": "core-hours",
+      "aggregation": "sum",
+      "instanceTypes": ["ce","cloud-instance"],
+      "expectedFor": ["ce","cloud-instance"],
+      "entryTags": ["submit","cores"]
+    },
+
+    {
+      "@id": "compute:cpu_work",
+      "@type": "Metric",
+      "legacyName": "cpu_work",
+      "unit": "benchmark-core-hours",
+      "aggregation": "sum",
+      "instanceTypes": ["ce","cloud-instance"],
+      "benchmarks": [
+        "HEPSCORE23",
+        "HS06",
+        "SI2K"
+      ]
+    },
+
+
+
+    {
+      "@id": "storage:disk_used",
+      "@type": "Metric",
+      "unit": "bytes",
+      "instanceTypes": ["se"],
+      "expectedFor": ["se"]
+    },
+
+    {
+      "@id": "storage:disk_total",
+      "@type": "Metric",
+      "unit": "bytes",
+      "instanceTypes": ["se"],
+      "expectedFor": ["se"]
+    },
+
+    {
+      "@id": "storage:tape_used",
+      "@type": "Metric",
+      "unit": "bytes",
+      "instanceTypes": ["se"]
+    },
+
+    {
+      "@id": "storage:tape_total",
+      "@type": "Metric",
+      "unit": "bytes",
+      "instanceTypes": ["se"]
+    },
+
+
+
+    {
+      "@id": "cloud:vm_count",
+      "@type": "Metric",
+      "unit": "count",
+      "instanceTypes": ["cloud-instance"]
+    },
+
+    {
+      "@id": "cloud:cpu_count",
+      "@type": "Metric",
+      "unit": "count",
+      "instanceTypes": ["cloud-instance"]
+    },
+
+    {
+      "@id": "cloud:memory_allocated_time",
+      "@type": "Metric",
+      "unit": "GB-hours",
+      "instanceTypes": ["cloud-instance"]
+    },
+
+    {
+      "@id": "cloud:disk_allocated_time",
+      "@type": "Metric",
+      "unit": "GB-hours",
+      "instanceTypes": ["cloud-instance"]
+    },
+
+    {
+      "@id": "cloud:network_in",
+      "@type": "Metric",
+      "unit": "bytes",
+      "instanceTypes": ["cloud-instance"]
+    },
+
+    {
+      "@id": "cloud:network_out",
+      "@type": "Metric",
+      "unit": "bytes",
+      "instanceTypes": ["cloud-instance"]
+    },
+
+
+
+    {
+      "@id": "accelerator:count",
+      "@type": "Metric",
+      "legacyName": "accelerator_count",
+      "unit": "count",
+      "instanceTypes": ["accelerator-instance"],
+      "entryTags": ["type","model"]
+    },
+
+    {
+      "@id": "accelerator:cores",
+      "@type": "Metric",
+      "legacyName": "accelerator_cores",
+      "unit": "count",
+      "instanceTypes": ["accelerator-instance"]
+    },
+
+    {
+      "@id": "accelerator:available_time",
+      "@type": "Metric",
+      "legacyName": "accelerator_available_time",
+      "unit": "accelerator-hours",
+      "instanceTypes": ["accelerator-instance"]
+    },
+
+    {
+      "@id": "accelerator:active_time",
+      "@type": "Metric",
+      "legacyName": "accelerator_active_time",
+      "unit": "accelerator-hours",
+      "instanceTypes": ["accelerator-instance"]
+    },
+
+    {
+      "@id": "accelerator:work",
+      "@type": "Metric",
+      "legacyName": "accelerator_work",
+      "unit": "benchmark-accelerator-hours",
+      "instanceTypes": ["accelerator-instance"]
+    },
+
+
+
+    {
+      "@id": "sw:energy",
+      "@type": "Metric",
+      "legacyName": "energy_consumed",
+      "unit": "kWh",
+      "instanceTypes": [
+        "ce",
+        "cloud-instance"
+      ],
+      "entryTags": [
+        "method"
+      ]
+    },
+
+    {
+      "@id": "sw:carbon_operational",
+      "@type": "Metric",
+      "legacyName": "operational_carbon",
+      "unit": "gCO2e",
+      "instanceTypes": [
+        "ce",
+        "cloud-instance"
+      ],
+      "entryTags": [
+        "method",
+        "carbon_mode"
+      ]
+    },
+
+    {
+      "@id": "sw:carbon_embodied",
+      "@type": "Metric",
+      "legacyName": "embodied_carbon",
+      "unit": "gCO2e",
+      "instanceTypes": [
+        "ce",
+        "cloud-instance"
+      ],
+      "entryTags": [
+        "method"
+      ]
+    },
+
+
+
+    {
+      "@id": "sf:energy_total",
+      "@type": "Metric",
+      "legacyName": "facility_energy",
+      "unit": "kWh",
+      "instanceTypes": ["facility"]
+    },
+
+    {
+      "@id": "sf:energy_it",
+      "@type": "Metric",
+      "legacyName": "it_energy",
+      "unit": "kWh",
+      "instanceTypes": ["facility"]
+    },
+
+    {
+      "@id": "sf:energy_renewable",
+      "@type": "Metric",
+      "legacyName": "renewable_energy",
+      "unit": "kWh",
+      "instanceTypes": ["facility"]
+    },
+
+    {
+      "@id": "sf:energy_reused",
+      "@type": "Metric",
+      "legacyName": "reused_energy",
+      "unit": "kWh",
+      "instanceTypes": ["facility"]
+    },
+
+    {
+      "@id": "sf:energy_cooling",
+      "@type": "Metric",
+      "legacyName": "cooling_energy",
+      "unit": "kWh",
+      "instanceTypes": ["facility"]
+    },
+
+    {
+      "@id": "sf:cooling_heat_removed",
+      "@type": "Metric",
+      "legacyName": "cooling_heat_removed",
+      "unit": "kWh",
+      "instanceTypes": ["facility"]
+    },
+
+    {
+      "@id": "sf:water_input",
+      "@type": "Metric",
+      "legacyName": "water_input",
+      "unit": "L",
+      "instanceTypes": ["facility"]
+    },
+
+    {
+      "@id": "sf:carbon_operational",
+      "@type": "Metric",
+      "legacyName": "facility_carbon",
+      "unit": "gCO2e",
+      "instanceTypes": ["facility"],
+      "entryTags": [
+        "method",
+        "carbon_mode"
+      ]
+    },
+
+
+
+    {
+      "@id": "kpi:cpu_efficiency",
+      "@type": "DerivedMetric",
+      "formula": "compute:cpu_time / compute:wall_clock_time",
+      "unit": "ratio"
+    },
+
+    {
+      "@id": "kpi:disk_free",
+      "@type": "DerivedMetric",
+      "formula": "storage:disk_total - storage:disk_used",
+      "unit": "bytes"
+    },
+
+    {
+      "@id": "kpi:tape_free",
+      "@type": "DerivedMetric",
+      "formula": "storage:tape_total - storage:tape_used",
+      "unit": "bytes"
+    },
+
+    {
+      "@id": "kpi:pue",
+      "@type": "DerivedMetric",
+      "formula": "sf:energy_total / sf:energy_it",
+      "unit": "ratio"
+    },
+
+    {
+      "@id": "kpi:renewable_energy_factor",
+      "@type": "DerivedMetric",
+      "formula": "sf:energy_renewable / sf:energy_total",
+      "unit": "ratio"
+    },
+
+    {
+      "@id": "kpi:energy_reuse_factor",
+      "@type": "DerivedMetric",
+      "formula": "sf:energy_reused / sf:energy_total",
+      "unit": "ratio"
+    },
+
+    {
+      "@id": "kpi:cooling_efficiency_ratio",
+      "@type": "DerivedMetric",
+      "formula": "sf:cooling_heat_removed / sf:energy_cooling",
+      "unit": "ratio"
+    },
+
+    {
+      "@id": "kpi:wue",
+      "@type": "DerivedMetric",
+      "formula": "sf:water_input / sf:energy_it",
+      "unit": "L/kWh"
+    },
+
+    {
+      "@id": "kpi:cue",
+      "@type": "DerivedMetric",
+      "formula": "sf:carbon_operational / sf:energy_it",
+      "unit": "gCO2e/kWh"
+    }
+
+  ]
+}
