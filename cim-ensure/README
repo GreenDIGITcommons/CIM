@@ -1,1 +1,5 @@
 This directory is for CIM related file for ENSURE metrics inventory.
+
+metrics-schema-v01.json - flat metris, KPi namespace
+
+metrics-schema-v02.json - added namespace prefix for "pear:" specific data and metrics/KPI related to different facility groups
